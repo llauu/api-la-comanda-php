@@ -6,12 +6,6 @@ class Usuario {
     public $nombre;
     public $apellido;
     public $rol;
-
-    public function __construct($nombre, $apellido, $rol) {
-        $this->nombre = $nombre;
-        $this->apellido = $apellido;
-        $this->rol = $rol;
-    }
     
     public function crearUsuario() {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
@@ -35,7 +29,7 @@ class Usuario {
     public static function obtenerUsuario($id) {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, rol FROM usuarios WHERE id = :id");
-        $consulta->bindValue(':id', $id, PDO::PARAM_STR);
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchObject('Usuario');

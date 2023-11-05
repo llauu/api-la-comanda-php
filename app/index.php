@@ -56,13 +56,11 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
     // $group->delete('/', \MesaController::class . ':BorrarUno');
 });
 
-// Si se ingresa cualquier ruta que no estoy manejando, informo que no existe
-$app->get('/{any}', function (Request $request, Response $response) {
-    $data = [
-        'error' => 'La ruta ingresada no existe.'
-    ];
 
-    $response->getBody()->write(json_encode($data));
+// Si se ingresa cualquier ruta que no estoy manejando, informo que no existe
+$app->get('/{any}[/]', function (Request $request, Response $response) {
+    $response->getBody()->write(json_encode(['error' => 'La ruta ingresada no existe.']));
+
     return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
 });
 

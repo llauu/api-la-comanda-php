@@ -3,7 +3,6 @@ require_once './models/Usuario.php';
 require_once './interfaces/IApiUsable.php';
 
 class UsuarioController extends Usuario implements IApiUsable {
-
     public function CargarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
 
@@ -11,8 +10,11 @@ class UsuarioController extends Usuario implements IApiUsable {
         $apellido = $parametros['apellido'];
         $rol = $parametros['rol'];
 
-        // Creamos el usuario
-        $usr = new Usuario($nombre, $apellido, $rol);
+        $usr = new Usuario();
+
+        $usr->nombre = $nombre;
+        $usr->apellido = $apellido;
+        $usr->rol = $rol;
         $usr->crearUsuario();
 
         $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
@@ -23,20 +25,24 @@ class UsuarioController extends Usuario implements IApiUsable {
     }
 
     public function TraerUno($request, $response, $args) {
-        // Buscamos usuario por nombre
-        $usr = $args['usuario'];
-        $usuario = Usuario::obtenerUsuario($usr);
-        $payload = json_encode($usuario);
+        // Buscamos usuario por id
+        $id = $args['id'];
+        $usuario = Usuario::obtenerUsuario($id);
 
+        if(!$usuario) {
+            $usuario = array("error" => "Usuario no encontrado");
+        }
+
+        $payload = json_encode($usuario);
         $response->getBody()->write($payload);
+        
         return $response
           ->withHeader('Content-Type', 'application/json');
     }
 
     public function TraerTodos($request, $response, $args) {
         $lista = Usuario::obtenerTodos();
-        $payload = json_encode(array("listaUsuario" => $lista));
-
+        $payload = json_encode(array("listaUsuarios" => $lista));
         $response->getBody()->write($payload);
         return $response
           ->withHeader('Content-Type', 'application/json');
