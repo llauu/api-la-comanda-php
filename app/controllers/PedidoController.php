@@ -6,21 +6,48 @@ class PedidoController extends Pedido implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
 
-        $tiempoDePreparacion = $parametros['tiempoDePreparacion'];
-        $nombreCliente = $parametros['nombreCliente'];
-        $idMesa = $parametros['idMesa'];
+        if(isset($parametros['tiempoDePreparacion']) && isset($parametros['nombreCliente']) && isset($parametros['idMesa'])) {
+            $files = $request->getUploadedFiles();
 
-        $pedido = new Pedido();
+            // Verifica que la mesa exista
+            if(Mesa::existeIdMesaEnBaseDeDatos($parametros['idMesa']) > 0) {
+                // Verifica que la mesa este disponible
+                if(Mesa::obtenerEstadoMesa($parametros['idMesa']) == 'cerrada') {
+                    $pedido = new Pedido();
 
-        $pedido->id = Pedido::generarIdUnico(5);
-        $pedido->estado = 'pendiente';
-        $pedido->tiempoDePreparacion = $tiempoDePreparacion;
-        $pedido->nombreCliente = $nombreCliente;
-        $pedido->idMesa = $idMesa;
+                    $pedido->tiempoDePreparacion = $parametros['tiempoDePreparacion'];
+                    $pedido->nombreCliente = $parametros['nombreCliente'];
+                    $pedido->idMesa = $parametros['idMesa'];
+            
+                    $pedido->crearPedido();
+                    
+                    // Si se subio una foto, la guardo
+                    if(isset($files['fotoMesa'])) {
+                        // Seteo las extensiones de imagen que quiero permitir
+                        $extensionesValidas = array('jpg', 'jpeg', 'png');
 
-        $pedido->crearPedido();
+                        $extension = pathinfo($files['fotoMesa']->getClientFilename(), PATHINFO_EXTENSION);
+                        
+                        if(in_array($extension, $extensionesValidas)) {
+                            $destino = './fotos/mesas/'.$parametros['idMesa'].'_'.$pedido->id.'.'.$extension;
 
-        $payload = json_encode(array("mensaje" => "Pedido creado con exito"));
+                            $files['fotoMesa']->moveTo($destino);
+                        }
+                    }
+            
+                    $payload = json_encode(array("mensaje" => "Pedido creado con exito"));
+                }
+                else {
+                    $payload = json_encode(array("error" => "La mesa ingresada ya tiene un pedido pendiente"));
+                }
+            }
+            else {
+                $payload = json_encode(array("error" => "La mesa ingresada no existe"));
+            }
+        }
+        else {
+            $payload = json_encode(array("error" => "Parametros insuficientes"));    
+        }
 
         $response->getBody()->write($payload);
         return $response

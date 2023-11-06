@@ -25,7 +25,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
 });
 
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('/', \UsuarioController::class . ':TraerTodos');
+    $group->get('[/]', \UsuarioController::class . ':TraerTodos');
     $group->get('/{id}', \UsuarioController::class . ':TraerUno');
     $group->post('/', \UsuarioController::class . ':CargarUno');
     // $group->put('/', \UsuarioController::class . ':ModificarUno');
@@ -58,7 +58,7 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
 
 
 // Si se ingresa cualquier ruta que no estoy manejando, informo que no existe
-$app->get('/{any}[/]', function (Request $request, Response $response) {
+$app->map(['POST', 'PUT', 'DELETE'], '[/[{any}]]', function (Request $request, Response $response) {
     $response->getBody()->write(json_encode(['error' => 'La ruta ingresada no existe.']));
 
     return $response->withHeader('Content-Type', 'application/json')->withStatus(404);

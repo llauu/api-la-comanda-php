@@ -3,14 +3,16 @@
 class Producto {
     public $id;
     public $nombre;
+    public $sector;
     public $precio;
     public $tiempoDePreparacion;
 
     public function crearProducto() {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (id, nombre, tiempoDePreparacion, precio) VALUES (:id, :nombre, :tiempoDePreparacion, :precio)");
+        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (id, nombre, sector, tiempoDePreparacion, precio) VALUES (:id, :nombre, :sector, :tiempoDePreparacion, :precio)");
         $consulta->bindValue(':id', $this->id, PDO::PARAM_INT);
         $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(':sector', $this->sector, PDO::PARAM_STR);
         $consulta->bindValue(':tiempoDePreparacion', $this->tiempoDePreparacion, PDO::PARAM_INT);
         $consulta->bindValue(':precio', $this->precio, PDO::PARAM_STR);
         $consulta->execute();
@@ -20,7 +22,7 @@ class Producto {
 
     public static function obtenerTodos() {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tiempoDePreparacion, precio FROM productos");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, sector, tiempoDePreparacion, precio FROM productos");
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
@@ -28,7 +30,7 @@ class Producto {
 
     public static function obtenerProducto($id) {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tiempoDePreparacion, precio FROM productos WHERE id = :id");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, sector, tiempoDePreparacion, precio FROM productos WHERE id = :id");
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();
 

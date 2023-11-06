@@ -6,20 +6,22 @@ class UsuarioController extends Usuario implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
 
-        $nombre = $parametros['nombre'];
-        $apellido = $parametros['apellido'];
-        $rol = $parametros['rol'];
+        if(isset($parametros['nombre']) && isset($parametros['apellido']) && isset($parametros['rol'])) {
+            $usr = new Usuario();
 
-        $usr = new Usuario();
-
-        $usr->nombre = $nombre;
-        $usr->apellido = $apellido;
-        $usr->rol = $rol;
-        $usr->crearUsuario();
-
-        $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
+            $usr->nombre = $parametros['nombre'];
+            $usr->apellido = $parametros['apellido'];
+            $usr->rol = $parametros['rol'];
+            $usr->crearUsuario();
+    
+            $payload = json_encode(array("mensaje" => "Usuario creado con exito"));    
+        }
+        else {
+            $payload = json_encode(array("error" => "Parametros insuficientes"));    
+        }
 
         $response->getBody()->write($payload);
+    
         return $response
             ->withHeader('Content-Type', 'application/json');
     }

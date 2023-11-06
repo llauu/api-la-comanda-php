@@ -8,6 +8,11 @@ class Pedido {
     public $nombreCliente;
     public $idMesa;
 
+    public function __construct() {
+        $this->id = self::generarIdUnico();
+        $this->estado = 'pendiente';
+    }
+
     public function crearPedido() {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (id, estado, tiempoDePreparacion, nombreCliente, idMesa) VALUES (:id, :estado, :tiempoDePreparacion, :nombreCliente, :idMesa)");
