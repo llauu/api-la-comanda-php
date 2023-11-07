@@ -4,11 +4,6 @@ require_once './utils/Utils.php';
 class Mesa {
     public $id;
     public $estado;
-
-    public function __construct() {
-        $this->id = self::generarIdUnico();
-        $this->estado = 'cerrada';
-    }
     
     public function crearMesa() {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();

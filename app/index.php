@@ -4,6 +4,7 @@ require_once './controllers/PedidoController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 
+
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
@@ -36,6 +37,7 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
     $group->get('/', \PedidoController::class . ':TraerTodos');
     $group->get('/{id}', \PedidoController::class . ':TraerUno');
     $group->post('/', \PedidoController::class . ':CargarUno');
+    $group->post('/{idPedido}', \PedidoController::class . ':CargarProductoAlPedido');
     // $group->put('/', \PedidoController::class . ':ModificarUno');
     // $group->delete('/', \PedidoController::class . ':BorrarUno');
 });

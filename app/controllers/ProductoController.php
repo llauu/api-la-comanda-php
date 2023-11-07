@@ -6,13 +6,12 @@ class ProductoController extends Producto implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
 
-        if(isset($parametros['nombre']) && isset($parametros['sector']) && isset($parametros['precio']) && isset($parametros['tiempoDePreparacion'])) {
+        if(isset($parametros['nombre']) && isset($parametros['sector']) && isset($parametros['precio'])) {
             $producto = new Producto();
 
             $producto->nombre = $parametros['nombre'];
             $producto->sector = $parametros['sector'];
             $producto->precio = $parametros['precio'];
-            $producto->tiempoDePreparacion = $parametros['tiempoDePreparacion'];
             $producto->crearProducto();
     
             $payload = json_encode(array("mensaje" => "Producto creado con exito"));
