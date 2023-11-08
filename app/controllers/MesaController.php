@@ -44,6 +44,25 @@ class MesaController extends Mesa implements IApiUsable {
         return $response
           ->withHeader('Content-Type', 'application/json');
     }
+
+    public static function ModificarEstadoMesa($request, $response, $args) {
+        $parametros = $request->getParsedBody();
+
+        $id = $args['id'];
+        $estado = $parametros['estado'];
+
+        if(!Mesa::obtenerMesa($id)) {
+            $payload = json_encode(array("error" => "Mesa no encontrada"));
+        }
+        else {
+            Mesa::modificarEstado($id, $estado);
+            $payload = json_encode(array("mensaje" => "Estado de la mesa modificado con exito"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
     
     // public function ModificarUno($request, $response, $args) {
     //     $parametros = $request->getParsedBody();

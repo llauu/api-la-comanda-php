@@ -61,6 +61,14 @@ class Mesa {
         return $consulta->fetchObject('Mesa');
     }
 
+    public static function modificarEstado($id, $estado) {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("UPDATE mesas SET estado = :estado WHERE id = :id");
+        $consulta->bindValue(':id', $id, PDO::PARAM_STR);
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
+        $consulta->execute();
+    }
+
     // PARA DESPUES:
     // public function modificarUsuario($id) {
     //     $objAccesoDato = AccesoDatos::obtenerInstancia();

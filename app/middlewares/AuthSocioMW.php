@@ -4,10 +4,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
 
-class AutenticacionMiddleware
+class AuthSocioMW
 {
     /**
-     * Example middleware invokable class
+     * Verifica si el que esta intentando ingresar es un socio
      *
      * @param  ServerRequest  $request PSR-7 request
      * @param  RequestHandler $handler PSR-15 request handler
@@ -16,15 +16,16 @@ class AutenticacionMiddleware
      */
     public function __invoke(Request $request, RequestHandler $handler): Response
     {   
-        $parametros = $request->getQueryParams();
+        $parametros = $request->getParsedBody();
 
-        $sector = $parametros['sector'];
+        $rolUsuarioIniciado = $parametros['rolUsuarioIniciado'];
 
-        if ($sector === 'admin') {
-            // $response = $handler->handle($request);
-        } else {
+        if ($rolUsuarioIniciado === 'socio') {
+            $response = $handler->handle($request);
+        } 
+        else {
             $response = new Response();
-            $payload = json_encode(array("mensaje" => "No sos Admin"));
+            $payload = json_encode(array("mensaje" => "Esta accion solo puede ser realizada por un socio"));
             $response->getBody()->write($payload);
         }
 
