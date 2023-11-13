@@ -51,25 +51,22 @@ class Producto {
         return $arr['id'];
     }
 
-    // PARA DESPUES:
-    // public function modificarUsuario($id) {
-    //     $objAccesoDato = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET nombre = :nombre, apellido = :apellido, rol = :rol WHERE id = :id");
-    //     $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
-    //     $consulta->bindValue(':apellido', $this->apellido, PDO::PARAM_STR);
-    //     $consulta->bindValue(':rol', $this->rol, PDO::PARAM_STR);
-    //     $consulta->bindValue(':id', $this->id, PDO::PARAM_INT);
-    //     $consulta->execute();
-    // }
+    public static function modificarProducto($id, $nombre, $sector, $precio) {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE productos SET nombre = :nombre, sector = :sector, precio = :precio WHERE id = :id");
+        $consulta->bindValue(':nombre', $nombre, PDO::PARAM_STR);
+        $consulta->bindValue(':sector', $sector, PDO::PARAM_STR);
+        $consulta->bindValue(':precio', $precio, PDO::PARAM_INT);
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+        $consulta->execute();
+    }
 
-    // public static function borrarUsuario($id) {
-    //     $objAccesoDato = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET fechaBaja = :fechaBaja WHERE id = :id");
-    //     $fecha = new DateTime(date("d-m-Y"));
-    //     $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-    //     $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
-    //     $consulta->execute();
-    // }
+    public static function borrarProducto($id) {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("DELETE FROM productos WHERE id = :id");
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+        $consulta->execute();
+    }
 }
 
 ?>

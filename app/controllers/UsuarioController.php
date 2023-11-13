@@ -50,29 +50,37 @@ class UsuarioController extends Usuario implements IApiUsable {
           ->withHeader('Content-Type', 'application/json');
     }
     
-    // public function ModificarUno($request, $response, $args) {
-    //     $parametros = $request->getParsedBody();
+    public function ModificarUno($request, $response, $args) {
+        $parametros = $request->getParsedBody();
+        
+        $id = $parametros['id'];
+        $nombre = $parametros['nombre'];
+        $apellido = $parametros['apellido'];
+        $rol = $parametros['rol'];
 
-    //     $nombre = $parametros['nombre'];
-    //     Usuario::modificarUsuario($nombre);
+        if(Usuario::obtenerUsuario($id)) {
+            Usuario::modificarUsuario($id, $nombre, $apellido, $rol);
+            $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+        }
+        else {
+            $payload = json_encode(array("error" => "El id ingresado no existe"));
+        }
 
-    //     $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
 
-    //     $response->getBody()->write($payload);
-    //     return $response
-    //       ->withHeader('Content-Type', 'application/json');
-    // }
+    public function BorrarUno($request, $response, $args) {
+        $parametros = $request->getParsedBody();
 
-    // public function BorrarUno($request, $response, $args) {
-    //     $parametros = $request->getParsedBody();
+        $usuarioId = $parametros['usuarioId'];
+        Usuario::borrarUsuario($usuarioId);
 
-    //     $usuarioId = $parametros['usuarioId'];
-    //     Usuario::borrarUsuario($usuarioId);
+        $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
 
-    //     $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
-
-    //     $response->getBody()->write($payload);
-    //     return $response
-    //       ->withHeader('Content-Type', 'application/json');
-    // }
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
 }

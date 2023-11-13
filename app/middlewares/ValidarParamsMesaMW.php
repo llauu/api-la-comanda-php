@@ -27,7 +27,7 @@ class ValidarParamsMesaMW
                 }
                 else {
                     $response = new Response();
-                    $payload = json_encode(array("mensaje" => "Esta accion solo puede ser realizada por un socio"));
+                    $payload = json_encode(array("error" => "Solo los socios pueden cambiar el estado de la mesa a cerrada"));
                     $response->getBody()->write($payload);
                 }
                 break;

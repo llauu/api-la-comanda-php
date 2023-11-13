@@ -5,8 +5,10 @@ require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './middlewares/AuthSocioMW.php';
 require_once './middlewares/AuthMozoMW.php';
+require_once './middlewares/AuthEmpleadoMW.php';
 require_once './middlewares/ValidarParamsMesaMW.php';
 require_once './middlewares/ValidarCamposVaciosMW.php';
+require_once './middlewares/ValidarTiempoPreparacionMW.php';
 
 
 use Psr\Http\Message\ResponseInterface as Response;
@@ -31,23 +33,33 @@ $app->get('/', function (Request $request, Response $response, $args) {
 });
 
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('[/]', \UsuarioController::class . ':TraerTodos');
+    $group->get('[/]', \UsuarioController::class . ':TraerTodos')
+        ->add(new AuthSocioMW());
 
-    $group->get('/{id}', \UsuarioController::class . ':TraerUno');
+    $group->get('/{id}', \UsuarioController::class . ':TraerUno')
+        ->add(new AuthSocioMW());
 
     $group->post('/', \UsuarioController::class . ':CargarUno')
         ->add(new AuthSocioMW())
         ->add(new ValidarCamposVaciosMW());
 
-    // $group->put('/', \UsuarioController::class . ':ModificarUno')->add(new AuthSocioMW());
+    $group->put('/', \UsuarioController::class . ':ModificarUno')
+        ->add(new AuthSocioMW())
+        ->add(new ValidarCamposVaciosMW());
 
-    // $group->delete('/', \UsuarioController::class . ':BorrarUno')->add(new AuthSocioMW());
+    $group->delete('/', \UsuarioController::class . ':BorrarUno')
+        ->add(new AuthSocioMW());
 });
 
 $app->group('/pedidos', function (RouteCollectorProxy $group) {
-    $group->get('/', \PedidoController::class . ':TraerTodos');
+    $group->get('/', \PedidoController::class . ':TraerTodos')
+        ->add(new AuthSocioMW());
 
-    $group->get('/{id}', \PedidoController::class . ':TraerUno');
+    $group->get('/{id}', \PedidoController::class . ':TraerUno')
+        ->add(new AuthSocioMW());
+
+    $group->get('/pendientes/{sector}', \PedidoController::class . ':TraerPendientes')
+        ->add(new AuthEmpleadoMW());
 
     $group->post('/', \PedidoController::class . ':CargarUno')
         ->add(new AuthMozoMW())
@@ -57,15 +69,30 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         ->add(new AuthMozoMW())
         ->add(new ValidarCamposVaciosMW());
 
+    $group->put('/tomar-pedido/{idPedido}', \PedidoController::class . ':TomarPedido')
+        ->add(new AuthEmpleadoMW())
+        ->add(new ValidarTiempoPreparacionMW())
+        ->add(new ValidarCamposVaciosMW());
+
+    $group->put('/pedido-listo/{idPedido}', \PedidoController::class . ':PedidoListo')
+        ->add(new AuthEmpleadoMW())
+        ->add(new ValidarCamposVaciosMW());
+
+    $group->put('/servir-pedido/{idPedido}', \PedidoController::class . ':ServirPedido')
+        ->add(new AuthMozoMW())
+        ->add(new ValidarCamposVaciosMW());
+
     // $group->put('/', \PedidoController::class . ':ModificarUno')->add(new AuthSocioMW());
 
     // $group->delete('/', \PedidoController::class . ':BorrarUno')->add(new AuthSocioMW());
 });
 
 $app->group('/productos', function (RouteCollectorProxy $group) {
-    $group->get('/', \ProductoController::class . ':TraerTodos');
+    $group->get('/', \ProductoController::class . ':TraerTodos')
+        ->add(new AuthSocioMW());
 
-    $group->get('/{id}', \ProductoController::class . ':TraerUno');
+    $group->get('/{id}', \ProductoController::class . ':TraerUno')
+        ->add(new AuthSocioMW());
 
     $group->post('/', \ProductoController::class . ':CargarUno')
         ->add(new AuthSocioMW())
@@ -77,9 +104,11 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
 });
 
 $app->group('/mesas', function (RouteCollectorProxy $group) {
-    $group->get('/', \MesaController::class . ':TraerTodos');
+    $group->get('/', \MesaController::class . ':TraerTodos')
+        ->add(new AuthSocioMW());
 
-    $group->get('/{id}', \MesaController::class . ':TraerUno');
+    $group->get('/{id}', \MesaController::class . ':TraerUno')
+        ->add(new AuthSocioMW());
 
     $group->post('/', \MesaController::class . ':CargarUno')
         ->add(new AuthSocioMW())

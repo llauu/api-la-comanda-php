@@ -69,25 +69,20 @@ class Mesa {
         $consulta->execute();
     }
 
-    // PARA DESPUES:
-    // public function modificarUsuario($id) {
-    //     $objAccesoDato = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET nombre = :nombre, apellido = :apellido, rol = :rol WHERE id = :id");
-    //     $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
-    //     $consulta->bindValue(':apellido', $this->apellido, PDO::PARAM_STR);
-    //     $consulta->bindValue(':rol', $this->rol, PDO::PARAM_STR);
-    //     $consulta->bindValue(':id', $this->id, PDO::PARAM_INT);
-    //     $consulta->execute();
-    // }
+    public static function modificarMesa($id, $estado) {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estado = :estado WHERE id = :id");
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
+        $consulta->bindValue(':id', $id, PDO::PARAM_STR);
+        $consulta->execute();
+    }
 
-    // public static function borrarUsuario($id) {
-    //     $objAccesoDato = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET fechaBaja = :fechaBaja WHERE id = :id");
-    //     $fecha = new DateTime(date("d-m-Y"));
-    //     $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-    //     $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
-    //     $consulta->execute();
-    // }
+    public static function borrarMesa($id) {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("DELETE FROM mesas WHERE id = :id");
+        $consulta->bindValue(':id', $id, PDO::PARAM_STR);
+        $consulta->execute();
+    }
 }
 
 ?>

@@ -18,14 +18,21 @@ class AuthSocioMW
     {   
         $parametros = $request->getParsedBody();
 
-        $rolUsuarioIniciado = $parametros['rolUsuarioIniciado'];
+        if(isset($parametros['rolUsuarioIniciado'])) {
+            $rolUsuarioIniciado = $parametros['rolUsuarioIniciado'];
 
-        if ($rolUsuarioIniciado === 'socio') {
-            $response = $handler->handle($request);
-        } 
+            if ($rolUsuarioIniciado === 'socio') {
+                $response = $handler->handle($request);
+            } 
+            else {
+                $response = new Response();
+                $payload = json_encode(array("mensaje" => "Esta accion solo puede ser realizada por un socio"));
+                $response->getBody()->write($payload);
+            }
+        }
         else {
             $response = new Response();
-            $payload = json_encode(array("mensaje" => "Esta accion solo puede ser realizada por un socio"));
+            $payload = json_encode(array("error" => "Parametros insuficientes"));
             $response->getBody()->write($payload);
         }
 

@@ -116,6 +116,131 @@ class PedidoController extends Pedido implements IApiUsable {
           ->withHeader('Content-Type', 'application/json');
     }
     
+    public function TraerPendientes($request, $response, $args) {
+        $params = $request->getQueryParams();
+        $rol = strtolower($params['rolUsuarioIniciado']);
+        $sector = strtolower($args['sector']);
+
+        if(self::ValidarSectorYRol($sector, $rol)) {
+            $lista = Pedido::obtenerPendientesPorSector($sector);
+            $payload = json_encode(array("listaPedidosPendientes" => $lista));
+        }
+        else {
+            $payload = json_encode(array("error" => "El rol ingresado no es valido para este sector o se ingreso un sector invalido"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function TomarPedido($request, $response, $args) {
+        // EL ROL INGRESADO TIENE QUE COINCIDIR CON EL SECTOR DEL PEDIDO
+        $idPedido = $args['idPedido'];
+        $parametros = $request->getParsedBody();
+        $rol = $parametros['rolUsuarioIniciado'];
+        $tiempoPreparacion = $parametros['tiempoDePreparacion'];
+
+        $sectorDelPedido = Pedido::obtenerSectorPedido($idPedido);
+        
+        if($sectorDelPedido) {
+            $sectorDelPedido = $sectorDelPedido['sector'];
+
+            if(self::ValidarSectorYRol($sectorDelPedido, $rol)) 
+            {
+                Pedido::cambiarEstadoPedidoYTiempo($idPedido, 'en preparacion', $tiempoPreparacion);
+                $payload = json_encode(array("mensaje" => "Pedido tomado con exito"));
+            }
+            else {
+                $payload = json_encode(array("error" => "El rol ingresado no es valido para este pedido"));
+            }
+        }
+        else {
+            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+    
+    public function PedidoListo($request, $response, $args) {
+        $idPedido = $args['idPedido'];
+        $parametros = $request->getParsedBody();
+        $rol = $parametros['rolUsuarioIniciado'];
+
+        $sectorDelPedido = Pedido::obtenerSectorPedido($idPedido);
+        
+        if($sectorDelPedido) {
+            $sectorDelPedido = $sectorDelPedido['sector'];
+
+            if(self::ValidarSectorYRol($sectorDelPedido, $rol)) 
+            {
+                Pedido::cambiarEstadoPedido($idPedido, 'listo para servir');
+                $payload = json_encode(array("mensaje" => "Pedido colocado en listo para servir con exito"));
+            }
+            else {
+                $payload = json_encode(array("error" => "El rol ingresado no es valido para este pedido"));
+            }
+        }
+        else {
+            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+    
+    public function ServirPedido($request, $response, $args) {
+        $idPedido = $args['idPedido'];
+
+        $sectorDelPedido = Pedido::obtenerSectorPedido($idPedido);
+        
+        if($sectorDelPedido) {
+            Pedido::cambiarEstadoPedido($idPedido, 'servido');
+            $payload = json_encode(array("mensaje" => "Pedido servido con exito"));
+        }
+        else {
+            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+        }
+        
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function ValidarSectorYRol($sector, $rol) {
+        $rolValido = false;
+        $sectorValido = true;
+        
+        switch($sector) {
+            case 'tragos':
+                $rolValido = $rol == 'bartender';
+                break;
+
+            case 'cervezas':
+                $rolValido = $rol == 'cervecero';
+                break;
+
+            case 'cocina':
+            case 'candybar':
+                $rolValido = $rol == 'cocinero';
+                break;
+
+            default:
+                $sectorValido = false;
+                break;
+        }
+
+        if($rolValido && $sectorValido) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     // public function ModificarUno($request, $response, $args) {
     //     $parametros = $request->getParsedBody();
 
