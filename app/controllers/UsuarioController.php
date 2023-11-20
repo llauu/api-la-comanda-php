@@ -6,15 +6,22 @@ class UsuarioController extends Usuario implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
 
-        if(isset($parametros['nombre']) && isset($parametros['apellido']) && isset($parametros['rol'])) {
-            $usr = new Usuario();
+        if(isset($parametros['nombre']) && isset($parametros['apellido']) && isset($parametros['usuario']) && isset($parametros['clave']) && isset($parametros['rol'])) {
+            if(Usuario::ObtenerUsuarioPorUsuario($parametros['usuario'])) {
+                $payload = json_encode(array("error" => "El nombre de usuario ingresado ya existe, ingrese otro"));
+            }
+            else {
+                $usr = new Usuario();
 
-            $usr->nombre = $parametros['nombre'];
-            $usr->apellido = $parametros['apellido'];
-            $usr->rol = $parametros['rol'];
-            $usr->crearUsuario();
-    
-            $payload = json_encode(array("mensaje" => "Usuario creado con exito"));    
+                $usr->nombre = $parametros['nombre'];
+                $usr->apellido = $parametros['apellido'];
+                $usr->apellido = $parametros['usuario'];
+                $usr->apellido = $parametros['clave'];
+                $usr->rol = $parametros['rol'];
+                $usr->crearUsuario();
+        
+                $payload = json_encode(array("mensaje" => "Usuario creado con exito"));    
+            }
         }
         else {
             $payload = json_encode(array("error" => "Parametros insuficientes"));    
@@ -52,23 +59,30 @@ class UsuarioController extends Usuario implements IApiUsable {
     
     public function ModificarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
-        
-        $id = $parametros['id'];
-        $nombre = $parametros['nombre'];
-        $apellido = $parametros['apellido'];
-        $rol = $parametros['rol'];
 
-        if(Usuario::obtenerUsuario($id)) {
-            Usuario::modificarUsuario($id, $nombre, $apellido, $rol);
-            $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+        if(isset($parametros['nombre']) && isset($parametros['apellido']) && isset($parametros['usuario']) && isset($parametros['clave']) && isset($parametros['rol'])) {
+            $id = $parametros['id'];
+            $nombre = $parametros['nombre'];
+            $apellido = $parametros['apellido'];
+            $usuario = $parametros['usuario'];
+            $clave = $parametros['clave'];
+            $rol = $parametros['rol'];
+
+            if(Usuario::obtenerUsuario($id)) {
+                Usuario::modificarUsuario($id, $nombre, $apellido, $usuario, $clave, $rol);
+                $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+            }
+            else {
+                $payload = json_encode(array("error" => "El id ingresado no existe"));
+            } 
         }
         else {
-            $payload = json_encode(array("error" => "El id ingresado no existe"));
+            $payload = json_encode(array("error" => "Parametros insuficientes"));    
         }
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
     }
 
     public function BorrarUno($request, $response, $args) {

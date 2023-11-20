@@ -12,7 +12,7 @@ class ValidarCamposVaciosMW
         $fallo = false;
 
         foreach($parametros as $parametro) {
-            if($parametro == "") {
+            if(empty($parametro)) {
                 $response = new Response();
                 $payload = json_encode(array("error" => "Los parametros no pueden contener campos vacios"));
                 $response->getBody()->write($payload);

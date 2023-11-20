@@ -1,6 +1,7 @@
 {
     "require": {
         "slim/slim": "^4.12",
+        "firebase/php-jwt": "^4.0",
         "slim/psr7": "^1.6"
     }
 }
