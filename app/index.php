@@ -5,6 +5,7 @@ require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/LoginController.php';
 require_once './controllers/ArchivoController.php';
+require_once './controllers/EncuestaController.php';
 require_once './middlewares/AuthMiddleware.php';
 require_once './middlewares/ValidarParamsMesaMW.php';
 require_once './middlewares/ValidarCamposVaciosMW.php';
@@ -89,21 +90,19 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarToken')
         ->add(new ValidarCamposVaciosMW());
 
-    $group->put('/tomar-pedido/{idPedido}', \PedidoController::class . ':TomarPedido')
+    $group->put('/tomar-pedido/{idProductoPedido}', \PedidoController::class . ':TomarProductoPedido')
         ->add(\AuthMiddleware::class . ':VerificarRolEmpleado')
         ->add(\AuthMiddleware::class . ':VerificarToken')
         ->add(new ValidarTiempoPreparacionMW())
         ->add(new ValidarCamposVaciosMW());
 
-    $group->put('/pedido-listo/{idPedido}', \PedidoController::class . ':PedidoListo')
+    $group->put('/pedido-listo/{idProductoPedido}', \PedidoController::class . ':PedidoListo')
         ->add(\AuthMiddleware::class . ':VerificarRolEmpleado')
-        ->add(\AuthMiddleware::class . ':VerificarToken')
-        ->add(new ValidarCamposVaciosMW());
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 
     $group->put('/servir-pedido/{idPedido}', \PedidoController::class . ':ServirPedido')
         ->add(\AuthMiddleware::class . ':VerificarRolMozo')
-        ->add(\AuthMiddleware::class . ':VerificarToken')
-        ->add(new ValidarCamposVaciosMW());
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 
     // $group->put('/', \PedidoController::class . ':ModificarUno')->add(new AuthSocioMW());
 
@@ -159,7 +158,15 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
 });
  
 $app->group('/encuesta', function (RouteCollectorProxy $group) {
-    $group->post('/{id}', \LoginController::class . ':Login')
+    $group->get('/', \EncuestaController::class . ':TraerTodos')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
+
+    $group->get('/{id}', \EncuestaController::class . ':TraerUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
+
+    $group->post('/{idPedido}', \EncuestaController::class . ':CargarUno')
         ->add(new ValidarCamposVaciosMW());
 });
 

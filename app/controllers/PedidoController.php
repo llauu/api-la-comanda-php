@@ -11,9 +11,7 @@ class PedidoController extends Pedido implements IApiUsable {
         if(isset($parametros['nombreCliente']) && isset($parametros['idMesa'])) {
             $files = $request->getUploadedFiles();
 
-            // Verifica que la mesa exista (HACER EN EL MW)
             if(Mesa::existeIdMesaEnBaseDeDatos($parametros['idMesa']) > 0) {
-                // Verifica que la mesa este disponible (HACER EN EL MW)
                 if(Mesa::obtenerEstadoMesa($parametros['idMesa']) == 'cerrada') {
                     $pedido = new Pedido();
 
@@ -55,16 +53,56 @@ class PedidoController extends Pedido implements IApiUsable {
             ->withHeader('Content-Type', 'application/json');
     }
 
+    public function TraerUno($request, $response, $args) {
+        // Buscamos pedido por id alfanumerico de 5 caracteres
+        $id = $args['id'];
+        $pedido = Pedido::obtenerPedido($id);
+
+        if(!$pedido) {
+            $pedido = array("error" => "Pedido no encontrado");
+        }
+
+        $payload = json_encode($pedido);
+        $response->getBody()->write($payload);
+
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function TraerTodos($request, $response, $args) {
+        $lista = Pedido::obtenerTodos();
+        $payload = json_encode(array("listaPedidos" => $lista));
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+    
+    public function TraerPendientes($request, $response, $args) {
+        $sector = strtolower($args['sector']);
+        $rol = $request->getAttribute('rol');
+
+        if(self::ValidarSectorYRol($sector, $rol)) {
+            $lista = Pedido::obtenerPendientesPorSector($sector);
+            $payload = json_encode(array("listaPedidosPendientes" => $lista));
+        }
+        else {
+            $payload = json_encode(array("error" => "El rol ingresado no es valido para este sector o se ingreso un sector invalido"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    // Pedido - Producto
     public function CargarProductoAlPedido($request, $response, $args) {
         $idPedido = $args['idPedido'];
         $parametros = $request->getParsedBody();
 
         if(isset($parametros['nombreProducto']) && isset($parametros['unidades'])) {
-            // Verifica que el pedido exista (HACER EN EL MW)
             if(Pedido::existeIdPedidoEnBaseDeDatos($idPedido)) {
                 $idProducto = Producto::obtenerIdProducto($parametros['nombreProducto']);
                 
-                // Verifica que el producto exista (HACER EN EL MW)
                 if($idProducto) {
                     $pedidoProducto = new PedidoProducto();
 
@@ -92,67 +130,33 @@ class PedidoController extends Pedido implements IApiUsable {
             ->withHeader('Content-Type', 'application/json');
     }
 
-    public function TraerUno($request, $response, $args) {
-        // Buscamos pedido por id alfanumerico de 5 caracteres
-        $id = $args['id'];
-        $pedido = Pedido::obtenerPedido($id);
-
-        if(!$pedido) {
-            $pedido = array("error" => "Pedido no encontrado");
-        }
-
-        $payload = json_encode($pedido);
-        $response->getBody()->write($payload);
-
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
-
-    public function TraerTodos($request, $response, $args) {
-        $lista = Pedido::obtenerTodos();
-        $payload = json_encode(array("listaPedidos" => $lista));
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
-    
-    public function TraerPendientes($request, $response, $args) {
-        $params = $request->getQueryParams();
-        $rol = strtolower($params['rolUsuarioIniciado']);
-        $sector = strtolower($args['sector']);
-
-        if(self::ValidarSectorYRol($sector, $rol)) {
-            $lista = Pedido::obtenerPendientesPorSector($sector);
-            $payload = json_encode(array("listaPedidosPendientes" => $lista));
-        }
-        else {
-            $payload = json_encode(array("error" => "El rol ingresado no es valido para este sector o se ingreso un sector invalido"));
-        }
-
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
-
-    public function TomarPedido($request, $response, $args) {
-        // EL ROL INGRESADO TIENE QUE COINCIDIR CON EL SECTOR DEL PEDIDO
-        $idPedido = $args['idPedido'];
+    public function TomarProductoPedido($request, $response, $args) {
+        $idProductoPedido = $args['idProductoPedido'];
         $parametros = $request->getParsedBody();
-        $rol = $parametros['rolUsuarioIniciado'];
         $tiempoPreparacion = $parametros['tiempoDePreparacion'];
+        $rol = $request->getAttribute('rol');
 
-        $sectorDelPedido = Pedido::obtenerSectorPedido($idPedido);
-        
-        if($sectorDelPedido) {
-            $sectorDelPedido = $sectorDelPedido['sector'];
+        $sector = PedidoProducto::obtenerSectorProductoPedido($idProductoPedido);
 
-            if(self::ValidarSectorYRol($sectorDelPedido, $rol)) 
+        if($sector) {
+            if(self::ValidarSectorYRol($sector, $rol)) 
             {
-                Pedido::cambiarEstadoPedidoYTiempo($idPedido, 'en preparacion', $tiempoPreparacion);
-                $payload = json_encode(array("mensaje" => "Pedido tomado con exito"));
+                PedidoProducto::tomarProductoPedido($idProductoPedido, $tiempoPreparacion);
+
+                $idPedido = PedidoProducto::obtenerIdPedido($idProductoPedido);
+                if(Pedido::obtenerPedidoProductoTotal($idPedido) == Pedido::obtenerPedidoProductoEnPreparacion($idPedido)) {
+                    $tiempoMaxPreparacion = Pedido::obtenerTiempoMaxPreparacionDelPedido($idPedido);
+
+                    Pedido::cambiarEstadoPedidoYTiempo($idPedido, 'en preparacion', $tiempoMaxPreparacion);
+                    
+                    $payload = json_encode(array("mensaje" => "Producto del pedido tomado con exito. Todos los productos del pedido ya se encuentran en preparacion. El tiempo maximo de preparacion es: ".$tiempoMaxPreparacion));
+                }
+                else {
+                    $payload = json_encode(array("mensaje" => "Producto del pedido tomado con exito"));
+                }
             }
             else {
-                $payload = json_encode(array("error" => "El rol ingresado no es valido para este pedido"));
+                $payload = json_encode(array("error" => "El sector de este pedido no corresponde a tu rol"));
             }
         }
         else {
@@ -165,22 +169,29 @@ class PedidoController extends Pedido implements IApiUsable {
     }
     
     public function PedidoListo($request, $response, $args) {
-        $idPedido = $args['idPedido'];
-        $parametros = $request->getParsedBody();
-        $rol = $parametros['rolUsuarioIniciado'];
+        $idProductoPedido = $args['idProductoPedido'];
+        $rol = $request->getAttribute('rol');
 
-        $sectorDelPedido = Pedido::obtenerSectorPedido($idPedido);
+        $sector = PedidoProducto::obtenerSectorProductoPedido($idProductoPedido);
         
-        if($sectorDelPedido) {
-            $sectorDelPedido = $sectorDelPedido['sector'];
-
-            if(self::ValidarSectorYRol($sectorDelPedido, $rol)) 
+        if($sector) {
+            if(self::ValidarSectorYRol($sector, $rol)) 
             {
-                Pedido::cambiarEstadoPedido($idPedido, 'listo para servir');
-                $payload = json_encode(array("mensaje" => "Pedido colocado en listo para servir con exito"));
+                $idPedido = PedidoProducto::obtenerIdPedido($idProductoPedido);
+                
+                PedidoProducto::pedidoListo($idProductoPedido);
+
+                // Tengo que chequear si ya estan todos en listo para servir
+                if(Pedido::obtenerPedidoProductoTotal($idPedido) == Pedido::obtenerPedidoProductoListo($idPedido)) {
+                    Pedido::cambiarEstadoPedido($idPedido, 'listo para servir');
+                    $payload = json_encode(array("mensaje" => "Producto del pedido colocado en listo para servir con exito. Todos los productos del pedido ya se encuentran listos para servir"));
+                }
+                else {
+                    $payload = json_encode(array("mensaje" => "Producto del pedido colocado en listo para servir con exito"));
+                }
             }
             else {
-                $payload = json_encode(array("error" => "El rol ingresado no es valido para este pedido"));
+                $payload = json_encode(array("error" => "El sector de este pedido no corresponde a tu rol"));
             }
         }
         else {
@@ -194,15 +205,13 @@ class PedidoController extends Pedido implements IApiUsable {
     
     public function ServirPedido($request, $response, $args) {
         $idPedido = $args['idPedido'];
-
-        $sectorDelPedido = Pedido::obtenerSectorPedido($idPedido);
         
-        if($sectorDelPedido) {
+        if(Pedido::validarPedidoListoParaServir($idPedido)) {
             Pedido::cambiarEstadoPedido($idPedido, 'servido');
             $payload = json_encode(array("mensaje" => "Pedido servido con exito"));
         }
         else {
-            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+            $payload = json_encode(array("error" => "El pedido ingresado no se encuentra listo para servir o no existe"));
         }
         
         $response->getBody()->write($payload);
@@ -213,6 +222,11 @@ class PedidoController extends Pedido implements IApiUsable {
     public function ValidarSectorYRol($sector, $rol) {
         $rolValido = false;
         $sectorValido = true;
+
+        // El socio puede hacer cualquier cosa
+        if($rol == 'socio') {
+            return true;
+        }
         
         switch($sector) {
             case 'tragos':

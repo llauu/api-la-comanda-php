@@ -80,7 +80,7 @@ class AuthMiddleware
         try {
             $data = AutentificadorJWT::ObtenerData($token);
 
-            if ($data->rol == 'mozo') {
+            if ($data->rol == 'mozo' || $data->rol == 'socio') {
                 $response = $handler->handle($request);
             }
             else {
@@ -103,7 +103,8 @@ class AuthMiddleware
         try {
             $data = AutentificadorJWT::ObtenerData($token);
 
-            if ($data->rol == 'bartender' || $data->rol == 'cervecero' || $data->rol == 'cocinero') {
+            if ($data->rol == 'bartender' || $data->rol == 'cervecero' || $data->rol == 'cocinero' || $data->rol == 'socio') {
+                $request = $request->withAttribute('rol', $data->rol);
                 $response = $handler->handle($request);
             }
             else {
