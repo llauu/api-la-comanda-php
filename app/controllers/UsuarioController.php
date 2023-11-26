@@ -60,7 +60,7 @@ class UsuarioController extends Usuario implements IApiUsable {
     public function ModificarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
 
-        if(isset($parametros['nombre']) && isset($parametros['apellido']) && isset($parametros['usuario']) && isset($parametros['clave']) && isset($parametros['rol'])) {
+        if(isset($parametros['id']) && isset($parametros['nombre']) && isset($parametros['apellido']) && isset($parametros['usuario']) && isset($parametros['clave']) && isset($parametros['rol'])) {
             $id = $parametros['id'];
             $nombre = $parametros['nombre'];
             $apellido = $parametros['apellido'];

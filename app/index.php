@@ -104,9 +104,13 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarRolMozo')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
-    // $group->put('/', \PedidoController::class . ':ModificarUno')->add(new AuthSocioMW());
+    $group->put('/', \PedidoController::class . ':ModificarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 
-    // $group->delete('/', \PedidoController::class . ':BorrarUno')->add(new AuthSocioMW());
+    $group->delete('/', \PedidoController::class . ':BorrarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 });
 
 $app->group('/productos', function (RouteCollectorProxy $group) {
@@ -123,9 +127,13 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarToken')
         ->add(new ValidarCamposVaciosMW());
 
-    // $group->put('/', \ProductoController::class . ':ModificarUno')->add(new AuthSocioMW());
+    $group->put('/', \ProductoController::class . ':ModificarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 
-    // $group->delete('/', \ProductoController::class . ':BorrarUno')->add(new AuthSocioMW());
+    $group->delete('/', \ProductoController::class . ':BorrarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 });
 
 $app->group('/mesas', function (RouteCollectorProxy $group) {
@@ -152,9 +160,13 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
-    // $group->put('/', \MesaController::class . ':ModificarUno')->add(new AuthSocioMW());
+    $group->put('/', \MesaController::class . ':ModificarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
     
-    // $group->delete('/', \MesaController::class . ':BorrarUno')->add(new AuthSocioMW());
+    $group->delete('/', \MesaController::class . ':BorrarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
 });
  
 $app->group('/encuesta', function (RouteCollectorProxy $group) {

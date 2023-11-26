@@ -255,29 +255,43 @@ class PedidoController extends Pedido implements IApiUsable {
         }
     }
 
-    // public function ModificarUno($request, $response, $args) {
-    //     $parametros = $request->getParsedBody();
+    public function ModificarUno($request, $response, $args) {
+        $parametros = $request->getParsedBody();
 
-    //     $nombre = $parametros['nombre'];
-    //     Usuario::modificarUsuario($nombre);
+        if(isset($parametros['id']) && isset($parametros['estado']) && isset($parametros['tiempoDePreparacion']) && isset($parametros['nombreCliente']) && isset($parametros['idMesa'])) {
+            $id = $parametros['id'];
+            $estado = $parametros['estado'];
+            $tiempoDePreparacion = $parametros['tiempoDePreparacion'];
+            $nombreCliente = $parametros['nombreCliente'];
+            $idMesa = $parametros['idMesa'];
 
-    //     $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+            if(Pedido::obtenerPedido($id)) {
+                Pedido::modificarPedido($id, $estado, $tiempoDePreparacion, $nombreCliente, $idMesa);
+                $payload = json_encode(array("mensaje" => "Pedido modificado con exito"));
+            }
+            else {
+                $payload = json_encode(array("error" => "El id ingresado no existe"));
+            } 
+        }
+        else {
+            $payload = json_encode(array("error" => "Parametros insuficientes"));    
+        }
 
-    //     $response->getBody()->write($payload);
-    //     return $response
-    //       ->withHeader('Content-Type', 'application/json');
-    // }
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
 
-    // public function BorrarUno($request, $response, $args) {
-    //     $parametros = $request->getParsedBody();
+    public function BorrarUno($request, $response, $args) {
+        $parametros = $request->getParsedBody();
 
-    //     $usuarioId = $parametros['usuarioId'];
-    //     Usuario::borrarUsuario($usuarioId);
+        $id = $parametros['id'];
+        Pedido::borrarPedido($id);
 
-    //     $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
+        $payload = json_encode(array("mensaje" => "Pedido borrado con exito"));
 
-    //     $response->getBody()->write($payload);
-    //     return $response
-    //       ->withHeader('Content-Type', 'application/json');
-    // }
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
 }

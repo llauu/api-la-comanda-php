@@ -1,7 +1,7 @@
 <?php
 require_once './models/Encuesta.php';
 
-class EncuestaController extends Encuesta implements IApiUsable {
+class EncuestaController extends Encuesta {
     public function CargarUno($request, $response, $args) {
         $parametros = $request->getParsedBody();
         $idPedido = $args['idPedido'];
