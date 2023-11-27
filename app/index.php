@@ -76,6 +76,8 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
+    $group->get('/consultar/{idPedido}', \PedidoController::class . ':ConsultarTiempoRestante');
+
     $group->get('/pendientes/{sector}', \PedidoController::class . ':TraerPendientes')
         ->add(\AuthMiddleware::class . ':VerificarRolEmpleado')
         ->add(\AuthMiddleware::class . ':VerificarToken');
@@ -104,11 +106,20 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarRolMozo')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
+    $group->put('/cobrar-pedido/{idPedido}', \PedidoController::class . ':CobrarPedido')
+        ->add(\AuthMiddleware::class . ':VerificarRolMozo')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
+
     $group->put('/', \PedidoController::class . ':ModificarUno')
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
     $group->delete('/', \PedidoController::class . ':BorrarUno')
+        ->add(\AuthMiddleware::class . ':VerificarRolSocio')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
+
+        
+    $group->get('/facturacion/{idPedido}', \PedidoController::class . ':obtenerFacturacion')
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 });

@@ -186,6 +186,41 @@ class Pedido {
 
         return false;
     }
+
+    public static function obtenerIdMesa($idPedido) {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta('SELECT idMesa FROM pedidos WHERE id = :idPedido');
+        $consulta->bindValue(':idPedido', $idPedido, PDO::PARAM_STR);
+        $consulta->execute();
+
+        $row = $consulta->fetch(PDO::FETCH_ASSOC);
+        return $row['idMesa'];
+    }
+    
+    public static function obtenerFacturacionDelPedido($idPedido) {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta('SELECT SUM(pedido_producto.unidades * productos.precio) AS facturacion
+                                                        FROM `pedidos` 
+                                                        INNER JOIN pedido_producto ON pedidos.id = pedido_producto.idPedido 
+                                                        INNER JOIN productos ON pedido_producto.idProducto = productos.id 
+                                                        WHERE pedidos.id = :idPedido;');
+
+        $consulta->bindValue(':idPedido', $idPedido, PDO::PARAM_STR);
+        $consulta->execute();
+
+        $row = $consulta->fetch(PDO::FETCH_ASSOC);
+        return $row['facturacion'];
+    }
+
+    public static function obtenerTiempoPreparacion($idPedido) {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta('SELECT tiempoDePreparacion FROM pedidos WHERE id = :idPedido;');
+        $consulta->bindValue(':idPedido', $idPedido, PDO::PARAM_STR);
+        $consulta->execute();
+
+        $row = $consulta->fetch(PDO::FETCH_ASSOC);
+        return $row['tiempoDePreparacion'];
+    }
 }
 
 ?>

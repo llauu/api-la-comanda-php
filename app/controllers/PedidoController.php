@@ -1,6 +1,7 @@
 <?php
 require_once './models/Pedido.php';
 require_once './models/Producto.php';
+require_once './models/Mesa.php';
 require_once './models/PedidoProducto.php';
 require_once './interfaces/IApiUsable.php';
 
@@ -19,6 +20,7 @@ class PedidoController extends Pedido implements IApiUsable {
                     $pedido->idMesa = $parametros['idMesa'];
             
                     $pedido->crearPedido();
+                    Mesa::modificarEstado($parametros['idMesa'], 'con cliente esperando pedido');
                     
                     // Si se subio una foto, la guardo
                     if(isset($files['fotoMesa'])) {
@@ -208,6 +210,9 @@ class PedidoController extends Pedido implements IApiUsable {
         
         if(Pedido::validarPedidoListoParaServir($idPedido)) {
             Pedido::cambiarEstadoPedido($idPedido, 'servido');
+
+            $idMesa = Pedido::obtenerIdMesa($idPedido);
+            Mesa::modificarEstado($idMesa, 'con cliente comiendo');
             $payload = json_encode(array("mensaje" => "Pedido servido con exito"));
         }
         else {
@@ -217,6 +222,26 @@ class PedidoController extends Pedido implements IApiUsable {
         $response->getBody()->write($payload);
         return $response
           ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function CobrarPedido($request, $response, $args) {
+        $idPedido = $args['idPedido'];
+
+        if(Pedido::existeIdPedidoEnBaseDeDatos($idPedido)) {
+            $idMesa = Pedido::obtenerIdMesa($idPedido);
+            $facturacion = Pedido::obtenerFacturacionDelPedido($idPedido);
+            
+            Pedido::cambiarEstadoPedido($idPedido, 'finalizado');
+            Mesa::modificarEstado($idMesa, 'con cliente pagando');
+            $payload = json_encode(array("facturacion" => $facturacion));
+        }
+        else {
+            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
     }
 
     public function ValidarSectorYRol($sector, $rol) {
@@ -289,6 +314,41 @@ class PedidoController extends Pedido implements IApiUsable {
         Pedido::borrarPedido($id);
 
         $payload = json_encode(array("mensaje" => "Pedido borrado con exito"));
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public static function ConsultarTiempoRestante($request, $response, $args) {
+        $idPedido = $args['idPedido'];
+
+        $pedido = Pedido::obtenerPedido($idPedido); 
+
+        if($pedido) {
+            $tiempoRestante = Pedido::obtenerTiempoPreparacion($idPedido);
+            $payload = json_encode(array("tiempoRestante" => $tiempoRestante));
+        }
+        else {
+            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function obtenerFacturacion($request, $response, $args) {
+        $idPedido = $args['idPedido'];
+        $pedido = Pedido::obtenerPedido($idPedido);
+
+        if($pedido) {
+            $facturacion = Pedido::obtenerFacturacionDelPedido($idPedido);
+            $payload = json_encode(array("facturacion" => $facturacion));
+        }
+        else {
+            $payload = json_encode(array("error" => "El pedido ingresado no existe"));
+        }
 
         $response->getBody()->write($payload);
         return $response
