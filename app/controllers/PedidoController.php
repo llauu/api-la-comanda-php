@@ -96,6 +96,15 @@ class PedidoController extends Pedido implements IApiUsable {
           ->withHeader('Content-Type', 'application/json');
     }
 
+    public function TraerPedidosListos($request, $response, $args) {
+        $lista = Pedido::obtenerPedidosListos();
+        $payload = json_encode(array("listaPedidosListosParaSevir" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
     // Pedido - Producto
     public function CargarProductoAlPedido($request, $response, $args) {
         $idPedido = $args['idPedido'];

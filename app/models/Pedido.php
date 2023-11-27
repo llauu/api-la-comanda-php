@@ -50,7 +50,7 @@ class Pedido {
         $consulta = $objAccesoDatos->prepararConsulta("SELECT id, estado, tiempoDePreparacion, nombreCliente, idMesa FROM pedidos");
         $consulta->execute();
 
-        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function obtenerPedido($id) {
@@ -90,6 +90,14 @@ class Pedido {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta('SELECT pedidos.estado, productos.nombre AS producto, pedido_producto.unidades AS unidades, pedido_producto.id AS id_pedido_producto FROM pedidos INNER JOIN pedido_producto ON pedidos.id = pedido_producto.idPedido INNER JOIN productos ON pedido_producto.idProducto = productos.id WHERE productos.sector = :sector AND pedido_producto.estado IS NULL ORDER BY pedidos.idMesa;');
         $consulta->bindValue(':sector', $sector, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function obtenerPedidosListos() {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta('SELECT id, nombreCliente, estado, idMesa FROM pedidos WHERE estado = "listo para servir" ORDER BY idMesa;');
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_ASSOC);

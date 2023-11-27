@@ -72,7 +72,7 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
-    $group->get('/{id}', \PedidoController::class . ':TraerUno')
+    $group->get('/pedido/{id}', \PedidoController::class . ':TraerUno')
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
@@ -80,6 +80,10 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
 
     $group->get('/pendientes/{sector}', \PedidoController::class . ':TraerPendientes')
         ->add(\AuthMiddleware::class . ':VerificarRolEmpleado')
+        ->add(\AuthMiddleware::class . ':VerificarToken');
+        
+    $group->get('/listos', \PedidoController::class . ':TraerPedidosListos')
+        ->add(\AuthMiddleware::class . ':VerificarRolMozo')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
     $group->post('/', \PedidoController::class . ':CargarUno')
