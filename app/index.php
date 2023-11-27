@@ -171,7 +171,7 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
         ->add(new ValidarParamsMesaMW())
         ->add(new ValidarCamposVaciosMW());
 
-    $group->put('/cerrar/{id}', \MesaController::class . ':ModificarEstadoMesa')
+    $group->put('/cerrar/{id}', \MesaController::class . ':CerrarMesa')
         ->add(\AuthMiddleware::class . ':VerificarRolSocio')
         ->add(\AuthMiddleware::class . ':VerificarToken');
 
