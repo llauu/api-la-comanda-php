@@ -59,7 +59,7 @@ class Pedido {
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();
 
-        return $consulta->fetchObject('Pedido');
+        return $consulta->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function validarPedidoListoParaServir($id) {
